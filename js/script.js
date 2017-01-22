@@ -1,7 +1,6 @@
-$(document).ready(function(){
-  submitForm();
+"use strict";
 
-});
+
 
 function submitForm() {
   $("form").on('submit', function(event){
@@ -23,22 +22,22 @@ function GithubInteractor(token) {
 
 function createIssue(repoName, repoOwner, title, body) {
 
-  var interactor = new GithubInteractor("4c50232161bae4f0ad3de8486b119dcbea388db9");
+  var interactor = new GithubInteractor("4333529981aef08bb8b1c9793593cedd415c7848");
   var url = "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/issues";
   var data = {
     title: title,
     body: body
   };
-  alert(url);
+//  alert(url);
 
   $.ajax({
     url: url,
     type: 'POST',
-    headers: {
-      Authorization: "token 4c50232161bae4f0ad3de8486b119dcbea388db9"
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader("Authorization", "token " + interactor.token);
     },
     data: JSON.stringify(data),
-    dataType: 'json'
+  //  dataType: 'json'
   }).done(handleResponse)
   .fail(handleError);
 }
@@ -51,3 +50,7 @@ function handleResponse(data) {
 function handleError(xhr, status, error) {
   $('#issue').html("Post error: " + error)
 }
+$(document).ready(function(){
+  submitForm();
+
+});

@@ -1,19 +1,4 @@
-$(document).ready(function(){
-  submitForm();
-
-});
-
-function submitForm() {
-  $("form").on('submit', function(event){
-    var repoName = $("#repoName").val();
-    var repoOwner = $("#repoOwner").val();
-    var title = $("#title").val();
-    var body = $("#body").val();
-
-    createIssue(repoName, repoOwner, title, body);
-    event.preventDefault();
-  });
-}
+'use strict';
 
 
 function GithubInteractor(token) {
@@ -21,33 +6,53 @@ function GithubInteractor(token) {
 }
 
 
-function createIssue(repoName, repoOwner, title, body) {
-
-  var interactor = new GithubInteractor("4c50232161bae4f0ad3de8486b119dcbea388db9");
+function createIssue(repoName, repoOwner, title, body){
+  var someToken;
+  var interactor = new GithubInteractor(someToken);
   var url = "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/issues";
   var data = {
     title: title,
     body: body
   };
-  alert(url);
 
   $.ajax({
     url: url,
     type: 'POST',
-    headers: {
-      Authorization: "token 4c50232161bae4f0ad3de8486b119dcbea388db9"
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader("Authorization", "token " + interactor.token);
     },
-    data: JSON.stringify(data),
-    dataType: 'json'
-  }).done(handleResponse)
+    data: JSON.stringify(data)
+
+  })
+  .done(handleResponse)
   .fail(handleError);
 }
-
 function handleResponse(data) {
-  var outhtml = '<a href="' + data.html_url +'">' + data.title + '</a><br>';
-  $('#issue').html(outhtml);
+  var issue = new Issue(data.html_url, data.title, data.body);
+  issue.outhtml();
+}
 
+function Issue(url, title, body) {
+  this.url = url;
+  this.title = title;
+  this.body = body;
+  this.outhtml = function(){
+    $('#issue').html('<a href="' + this.url +'">' + this.title + '</a><br>')
+  }
 }
 function handleError(xhr, status, error) {
   $('#issue').html("Post error: " + error)
 }
+
+$(document).ready(function(){
+
+  $("form").on('submit', function(e){
+    var repoName = $("#repoName").val();
+    var repoOwner = $("#repoOwner").val();
+    var title = $("#title").val();
+    var body = $("#body").val();
+
+    createIssue(repoName, repoOwner, title, body);
+    e.preventDefault();
+  });
+})
